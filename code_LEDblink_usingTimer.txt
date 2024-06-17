@@ -1,0 +1,26 @@
+#include "stm32f429xx.h"
+void def_gpio(){
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN; 			//enabling GPIOG
+	GPIOG->MODER &= ~(3 << (13 * 2));  			//clearing the 26th and 27th bits
+	GPIOG->MODER |= (1<<26);				//setting mode to O/P
+	}
+	void def_timer(){
+	RCC->APB1ENR |= RCC_APB1ENR_TIM7EN;			//enabling timer7
+	TIM7->PSC = 0x3E7F;					//Prescaler value = 16000(if counted 0)
+	TIM7->ARR = 0x3E7;					//Autoreload value = 1000(if counted 0)
+	TIM7->CR1 |= TIM_CR1_CEN;				//counter enable in timer7 control register
+	}
+	void ctrl_timer(){
+		while(1){
+			if (TIM7->SR & TIM_SR_UIF){		//status register and UIF flag bitwise &
+			TIM7->SR &= ~TIM_SR_UIF;		//clearing the UIF bit for next iteration
+			GPIOG->ODR ^= (1<<13);			//toggling PG13 by XOR
+			}
+		}
+	}
+int main(void){
+	def_gpio();
+	def_timer();
+	
+	ctrl_timer();
+}
