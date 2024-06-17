@@ -1,0 +1,23 @@
+#include "stm32f429xx.h"
+void delay_ms(int delay){ 									//defining delay. since the stm32f429 works on 16mhz
+	for(int i = 0; i < delay*4000; i=i+1){							//it means 16million cycles/sec
+	}																														//each loop iteration takse ~4 cycles so 
+}																															//16000/4=400 iterations for 1 mil sec delay.
+
+int main(){
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;			//enable GPIOA
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;			//enable GPIOG
+	GPIOG->MODER |= (1<<26);				//set 13th bit(PG13, LED) to O/P
+	GPIOG->OSPEEDR &= ~((1<<26)|(1<<27));			//set low speed for PG13
+	GPIOG->OTYPER &= ~(1<<13);				//Clearing the output type to 0(push-pull state)
+	GPIOA->MODER &= ~(1<<0);				//Clearing the PA0(Button) mode bit to ensure it is I/P
+	GPIOA->PUPDR |= (1<<1);					//Setting PA0 to Pull-up mode
+	
+	while(1)
+		if (GPIOA->IDR & GPIO_IDR_ID0){			//if IDR register and IDR0 bit's bitwise AND is equal,
+				delay_ms(1000);			//delay 1000ms
+				GPIOG->ODR ^= (1<<13);		//Toggle bit G register ODR 13 which is connected to LED
+		}
+	
+		}
+	}
