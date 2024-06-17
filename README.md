@@ -14,3 +14,6 @@ Setting-up Keil for STM32f429:
 6. Now the first thing we need to do is open "main.c" file and write #include "stm32f429xx.h".
 7. Now we can write our code by defining functions, Peripherals and pins in int main() etc.
 
+
+
+*LEDB_BM* contains a uvision project where the on-board User Button has been used to toggle the on-board Green LED.
