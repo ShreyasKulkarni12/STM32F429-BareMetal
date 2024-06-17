@@ -2,7 +2,7 @@
 Bare metal coding in STM32 with using Keil u-vision5.
   
   
-Setting-up Keil for STM32f429:
+# Setting-up Keil for STM32f429:
 1. Open Keil uvision-5, go to Project->New uvision project, give a suitable name to the project.
 2. It will now as you to select the device for the project, in my case, i have used STM32F429ZITx, you can choose any controller you want which is available to you.
 3. It will now open a "Manage Run-Time enviornment" tab wherein, you only need to select 2 things,
@@ -15,5 +15,4 @@ Setting-up Keil for STM32f429:
 7. Now we can write our code by defining functions, Peripherals and pins in int main() etc.
 
 
-
-*LEDB_BM* contains a uvision project where the on-board User Button has been used to toggle the on-board Green LED.
+*code for Button controlled LED.txt* contains a code where the on-board User Button has been used to toggle the on-board Green LED. you can paste the code in your project and run directly.
