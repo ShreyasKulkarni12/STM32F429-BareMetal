@@ -14,7 +14,7 @@ Bare metal coding in STM32 with using Keil u-vision5.
 6. Now the first thing we need to do is open "main.c" file and write #include "stm32f429xx.h".
 7. Now we can write our code by defining functions, Peripherals and pins in int main() etc.
 8. After doing so, we need to configure the Target. "Options for Target" button which has a magic wand like icon is available just above main.c.
-9. In the target we can select the ARM compiler, as well as the Freq(cLK) we want to run our system.(Selecting clocks is not available in Keil uvision 5 and higher), we can     also "simulate" the code(run the code without ACTUAL hardware) if we want, but that has its own limitations.
+9. In the target we can select the ARM compiler, as well as the Freq(CLK) we want to run our system at.(Selecting XTAL/Freq is not available in Keil uvision 5 and higher),      we can also "simulate" the code(run the code without ACTUAL hardware) if we want, but that has its own limitations.
 10. After this to upload the code to the STM32 Board, connect the controller with a USB-mini B to USB-A to the computer and select the Download option, which has LOAD           written over it, its shortcut is F8.
 
 *code for Button controlled LED.txt* contains a code where the on-board User Button has been used to toggle the on-board Green LED. you can paste the code in your project and run directly.
