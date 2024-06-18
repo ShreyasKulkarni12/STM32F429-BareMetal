@@ -18,4 +18,5 @@ Bare metal coding in STM32 with using Keil u-vision5.
 10. After this to upload the code to the STM32 Board, connect the controller with a USB-mini B to USB-A to the computer and select the Download option, which has LOAD           written over it, its shortcut is F8.
 
 *code for Button controlled LED.txt* contains a code where the on-board User Button has been used to toggle the on-board Green LED. you can paste the code in your project and run directly.
+
 *code_LEDblink_usingTimer.txt* contains a code where the internal timer-7, Auto-reload, Prescalers are used to generate a delay of 1 sec and toggle the LED on-board.
