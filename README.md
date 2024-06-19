@@ -19,4 +19,6 @@ Bare metal coding in STM32 with using Keil u-vision5.
 
 *code for Button controlled LED.txt* contains a code where the on-board User Button has been used to toggle the on-board Green LED. you can paste the code in your project and run directly.
 
-*code_LEDblink_usingTimer.txt* contains a code where the internal timer-7, Auto-reload, Prescalers are used to generate a delay of 1 sec and toggle the LED on-board.
+*code_LEDblink_usingTimer.txt* contains a code where the internal timer-7, Auto-reload, Prescalers are used to generate a delay of 1 sec and toggle the on-board LED. 
+
+*code_generating_PWM_usingTimers.txt* contains a code where the internal GenPurpose timer-2 has been used to generate a PWM signal of 500ms with also the on-board Red LED toggling at 1 sec intervals.
