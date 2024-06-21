@@ -14,7 +14,7 @@ GPIOA->AFR[0] |= (1<<3 | 1<<7); /*0x00000008;*/			//Set PA0 and PA1 as UART_TX/R
 }
 void usart_config(void){
 UART4->BRR = 0x0683;						//Baud rate set 9600 (USARTDIV = Fck / 16 x Baud)
-UART4->CR1 = 1<<3;						//Enable transmission bit												
+UART4->CR1 |= 1<<3;						//Enable transmission bit							
 UART4->CR2 = 0;					
 UART4->CR3 = 0;					
 UART4->CR1 |= 0x2000;						//Enable USART
@@ -23,8 +23,8 @@ void usart_write(int ch){
 int z;
 for (z=0; z<6; z++){
 	while(!(UART4->SR & 0x0080)){
-	}							//Check Status Register and TXE(transmission reg empty) bit, 
-UART4->DR = (ch & 0xFF);					//Put value in data register and ensure its 8 bit by masking 0xFF
+	}						//Check Status Register and TXE(transmission reg empty) bit, 
+UART4->DR = (ch & 0xFF);				//Put value in data register and ensure its 8 bit by masking 0xFF
 }
 }
 void delayMs(int n) {						//define delay
