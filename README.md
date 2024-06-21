@@ -22,3 +22,5 @@ Bare metal coding in STM32 with using Keil u-vision5.
 *code_LEDblink_usingTimer.txt* contains a code where the internal timer-7, Auto-reload, Prescalers are used to generate a delay of 1 sec and toggle the on-board LED. 
 
 *code_generating_PWM_usingTimers.txt* contains a code where the internal GenPurpose timer-2 has been used to generate a PWM signal of 500ms with also the on-board Red LED toggling at 1 sec intervals.
+
+*UART_usingSTM.txt* contains a code where STM32 and FTDI-FT232 UBS-serial connector is used for performing Serial communication. The code, hardware connections & other information is in the UART folder.
