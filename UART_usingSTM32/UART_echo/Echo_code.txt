@@ -1,0 +1,57 @@
+#include <stdint.h>
+#include "stm32f429xx.h"
+
+// Function prototypes
+void UART4_init(void);
+void UART4_write(unsigned char c); 
+void delayMs(int n);
+char UART4_read(void);
+
+int main(void) {
+		char c;
+    UART4_init();
+    while (1) {
+				c = UART4_read(); 
+				UART4_write(c); // Echo the received character
+			  delayMs(1);
+		}
+}
+void UART4_init(void) {
+    // Enable clocks for GPIOA and UART4
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN; // Enable GPIOA clock
+    RCC->APB1ENR |= RCC_APB1ENR_UART4EN; // Enable UART4 clock
+		RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN; // Enable GPIOG clock
+    // Configure PC10 and PC11 for UART4 TX and RX
+    GPIOG->MODER |= 1<<26;
+		GPIOC->MODER = 0; // Clear mode bits for PC10 and PC11
+    GPIOC->MODER |= (1<<21)|(1<<23); // Set alternate function mode
+    GPIOC->AFR[1] = 0; // Clear AF bits for PC10 and PC11
+    GPIOC->AFR[1] |= (8<<8)|(8<<12); // Set AF8 (UART4) for PC10 and PC11
+    
+    // Configure UART4
+    UART4->BRR = 0x0683; // Set baud rate to 9600 (assuming 16 MHz clock)
+	  UART4->CR1 =0; 
+    UART4->CR2 = 0; // 1 stop bit
+    UART4->CR3 = 0; // No flow control
+    UART4->CR1 = USART_CR1_UE; // Enable UART4
+		UART4->CR1 |= USART_CR1_TE | USART_CR1_RE; // Enable TX, RX
+}
+
+// Write a character to UART4
+void UART4_write(unsigned char ch) {
+    UART4->SR &= ~(USART_SR_RXNE);
+		while (!(UART4->SR & USART_SR_TXE)) {} // Wait until TXE (transmit data register empty) flag is set
+    UART4->DR = (ch & 0xFF);
+}
+
+// Read a character from UART4
+ char UART4_read(void) {
+		 while (!(UART4->SR & USART_SR_RXNE)) {} // Wait until RXNE (read data register not empty) flag is set
+		 return UART4->DR;
+		} 																	
+// Simple delay function
+void delayMs(int n) {
+    int i;
+    for (; n > 0; n--)
+        for (i = 0; i < 2000; i++);
+}
