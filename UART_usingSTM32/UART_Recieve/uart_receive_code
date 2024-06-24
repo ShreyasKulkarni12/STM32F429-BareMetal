@@ -1,0 +1,50 @@
+#include "stm32f429xx.h" 
+#include <stdint.h>
+void LED_on();
+void def_uart(void);
+char uart_read(void);
+void delayms(int);
+char c;
+
+void LED_on() {
+	GPIOG->ODR |= 1<<13;								//onboard LED PG13 on
+	delayms(200);
+
+delayms(800);
+}
+void def_uart(void){
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN|RCC_AHB1ENR_GPIOCEN;     //clken gpioA
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;                         //clken gpioG for led
+	RCC->APB1ENR |= RCC_APB1ENR_UART4EN;                         //clken for UART4
+	GPIOG->MODER |= (1<<26)|(1<<28);    				                 //PG 13 o/p
+	GPIOC->MODER |= (1<<21)|(1<<23);					                   // PC11 and 10 as AF
+	GPIOC->AFR[1] |=(8<<8)|(8<<12);         	                   // PC10 as TX and PC11 as RX
+	UART4->BRR = 0;
+	UART4->BRR = 0x0683;									                       //baudrate = 9600
+	UART4->CR1=0;
+	UART4->CR2 = 0;												
+	UART4->CR3 = 0;
+	UART4->CR1 |= (1<<13);								                       //enable UE
+	UART4->CR1 |= (1<<2)|(1<<3);				 	                       //enable tx and rx
+}	
+void delayms(int n){                                           //defining delay
+int i;
+for (; n > 0; n--)
+	for (i = 0; i < 2000; i++); 
+}
+char uart_read(){
+	
+	UART4 -> SR &= ~(1<<5);	
+	while(!(UART4->SR & (1<<5)));						//check for RXNE bit not empty
+	UART4 -> SR &= ~(1<<5);	
+	return UART4->DR;												//returning DR content
+}
+
+int main(){
+def_uart();
+c = uart_read();													//DR content to variable c
+if (c == 1) {
+	LED_on();																//if c=1 led glow
+
+}
+}
