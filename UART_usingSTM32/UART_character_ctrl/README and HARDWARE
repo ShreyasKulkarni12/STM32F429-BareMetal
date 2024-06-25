@@ -1,1 +1,16 @@
+Hardware connections for running UART : 
 
+Material Required : 1. Any STM32 board
+	            2. FTDI-FT232 IC [USB to serial]
+	            3. Tera-Term/Real-Term Application
+
+Working : 
+1. Locate the Tx, Rx and GND pins of FTDI-FT232 IC 
+2. FT232's Rx should be connected to STM32's Tx and FT232's Tx should be connected to STM32's Rx and FT232's GND should be connected to GND of STM32. 
+   This is very important to ensure every pin is connected correctly or it might short.
+3. Connect both the STM32 and FTDI-FT232 through 2 different USB's and 2 different ports of your laptop/device.
+4. Write to code to receive any message TO the STM32 through FTDI FT232.
+5. Upload the code to the STM32 while keeping the connections.
+6. Open Real-Term and select Port tab, now set the baud rate in it, the same one set by the software by code. now, click on "Change",
+   now go to "send" and send any ascii or integer, the PG13 LED[Green] should glow on the board if we enter "1" 
+   and PG14[Red] should glow if it is any other character/number.
