@@ -1,0 +1,25 @@
+#include "stm32f429xx.h"
+(#include any other libraries required.)
+/*declare prototypes*/
+void gpio_def(void);
+void uart_def(void);
+void uart_read(); [or uart_write or both]
+
+/*main function comes here*/
+int main(){
+/*call the functions here(gpio_def, uart_def and uart_read) and apply logic*/
+}
+
+void gpio_def(void){
+/*define gpio->clock->mode->output_type*/
+
+}
+
+void uart_def(void){
+/*define uart->baudrate->stop bits, parity bits etc in control registers->enable recieve, transmit and uart*/
+}
+
+void uart_read(){
+/*check SR register and RXNE bit*/
+/*return value to data register*/
+}
