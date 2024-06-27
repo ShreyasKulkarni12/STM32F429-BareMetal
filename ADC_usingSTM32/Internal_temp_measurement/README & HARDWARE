@@ -1,3 +1,14 @@
 Measuring the internal temprature of the SMT32F429ZITX IC with the help of an Internal Temprature sensor, connected to the ADC1_IN18 channel of the ADC peripheral.
 Material Required : 1. STM32F429-Discovery board
                     2. FTDI-FT232 module for UART
+                    3. Real-Term application
+Working : 
+1. Locate the Tx, Rx and GND pins of FTDI-FT232 IC 
+2. FT232's Rx should be connected to STM32's Tx and FT232's Tx should be connected to STM32's Rx and FT232's GND should be connected to GND of STM32. 
+   This is very important to ensure every pin is connected correctly or it might short.
+3. Connect both the STM32 and FTDI-FT232 through 2 different USB's and 2 different ports of your laptop/device.
+4. By software, write a code to turn on the VREFINT bit, ADC, and start the "continous" conversion. 
+5. The VREFINT bit internally is connected to the ADC1_IN18 channel and after flashing the code, turn on the Real-Term application
+6. The temprature values should be displayed, remember that ADCx->DR register is 16-bit and UARTx->DR is only 8 bit, so for a 12-bit ADC
+   the data should be sent twice by shifting the bits and sending again. In the Output image, there is "4" value which indicates
+   the data in the last 4 bits towards the MSB.
