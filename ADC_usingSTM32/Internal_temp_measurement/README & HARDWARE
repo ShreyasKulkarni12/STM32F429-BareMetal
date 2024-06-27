@@ -1,1 +1,3 @@
-
+Measuring the internal temprature of the SMT32F429ZITX IC with the help of an Internal Temprature sensor, connected to the ADC1_IN18 channel of the ADC peripheral.
+Material Required : 1. STM32F429-Discovery board
+                    2. FTDI-FT232 module for UART
