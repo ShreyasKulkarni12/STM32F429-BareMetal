@@ -1,0 +1,68 @@
+
+#include "stm32f429xx.h"
+#include <stdint.h>
+#include <string.h>
+void gpioUART_config(void);
+void adc_config(void);
+void start_con(void);
+uint16_t adc_read(void);
+void uart_send(int ch);
+void delayMs(int n);
+
+void gpioUART_config(void){
+/*PORT C CLOCK EN*/
+RCC->AHB1ENR = RCC_AHB1ENR_GPIOCEN;
+/*ALTERNATE FUNCTION FOR PC10 AND PC11*/
+GPIOC->MODER |= ((1<<21) | (1<<23));
+/*SET PC10 AND PC11 TO TX AND RX RESPECTIVELY*/
+GPIOC->AFR[1] |= ((1<<11)| (1<<15));
+/*CLOCK EN UART4*/
+RCC->APB1ENR |= RCC_APB1ENR_UART4EN;
+// Set baud rate to 9600 (assuming 16 MHz clock)
+UART4->BRR = 0x0683;
+// Enable TX, RX
+UART4->CR1 = USART_CR1_TE | USART_CR1_RE; 
+// 1 stop bit
+UART4->CR2 = 0x0000; 
+// No flow control
+UART4->CR3 = 0x0000;
+// Enable UART4
+UART4->CR1 |= USART_CR1_UE;
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;
+GPIOG->MODER |= 1<<26;
+}
+void adc_config(void){
+RCC->APB2ENR = RCC_APB2ENR_ADC1EN;
+ADC1->CR2 = (1<<0)|(1<<1); //ADC POWER ON AND SET TO CONT. MODE					
+ADC->CCR = (1<<23)| ADC_CCR_ADCPRE_0;						 //
+ADC1->SQR3 |= (18 << 0);
+
+}
+void start_con(void){
+ADC1->CR2 |= (1<<30);
+}
+uint16_t adc_read(){
+	while (!(ADC1->SR & ADC_SR_EOC)){}
+	ADC1->SR &= ~(ADC_SR_EOC);
+	return ADC1->DR;
+}
+int main(){
+gpioUART_config();
+adc_config();
+start_con();
+while(1){
+	int a = adc_read();
+	uart_send(a);
+	delayMs(1000);
+	uart_send(a>>8);
+	}
+}
+void uart_send(int ch){
+	while (!(UART4->SR & 0x0080)){}
+		UART4->DR = (ch & 0xFF);
+}
+void delayMs(int n) {			//give delay
+int i;
+for (; n > 0; n--)
+	for (i = 0; i < 2000; i++);
+} 
