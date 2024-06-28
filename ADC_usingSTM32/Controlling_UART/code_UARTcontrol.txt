@@ -1,0 +1,85 @@
+
+#include "stm32f429xx.h"
+/*prototype initialization*/
+void gpio_def();
+void usart_def();
+void adc_def();
+void usart_send(int ch);
+int adc_read();
+void delayMs(int n);
+
+int main(){
+gpio_def();
+usart_def();
+adc_def();
+int a;
+char m[] = "OK\r\n";
+char f[] = "NOT OK\r\n";
+int i;
+while(1){
+	a = adc_read();
+	if (a>2500){
+		for (i=0; i<4; i++){
+			usart_send(m[i]);}
+	}
+	else{
+		for (i=0;i<8;i++){
+			usart_send(f[i]);}
+		}	
+	delayMs(100);
+	}
+}
+
+void gpio_def(){
+/*Clock enable for port C*/
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+/*Analog mode for PC3*/
+GPIOC->MODER |= (3<<6);
+/*Alternate function mode for PC6 and PC7*/
+GPIOC->MODER |= ((2<<12) | (2<<14));
+/*Set PC6 and PC7 to USART6 TX and RX resp*/
+GPIOC->AFR[0] |= ((8<<24) | (8<<28));
+
+}
+void usart_def(){
+RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
+/*set baud rate to 9600*/
+USART6->BRR = 0x683;
+/*Enable transmission*/
+USART6->CR1 |= 1<<3;
+/*2 stop bit*/
+USART6->CR2 |= 1<<13;
+/*no flow control*/
+USART6->CR3 = 0;
+/*Enable USART*/
+USART6->CR1 |= 1<<13;
+}
+
+void adc_def(){
+RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+/*12 bit ADC*/
+ADC1->CR1 = 0;
+/*ADC on and CONT. mode ON*/
+ADC1->CR2 = (3<<0);
+/**/
+ADC->CCR = 0;
+/*Sequence #1 is 13th*/
+ADC1->SQR3 = 13;
+/*ADC conversion start SWSTART bit*/
+ADC1->CR2 |= 1<<30;
+}
+/*send configure*/
+void usart_send(int ch){
+while (!(USART6->SR & USART_SR_TXE)){} 
+	USART6->DR = (ch & 0xFF);
+}
+/*read configure*/
+int adc_read(){
+while (!(ADC1->SR & ADC_SR_EOC)){}
+	ADC1->SR &= ~(ADC_SR_EOC);
+	return ADC1->DR;
+}
+void delayMs(int n) {			//give delay
+int i;
+for (; n > 0; n--)
+	for (i = 0; i < 2000; i++);}
