@@ -1,0 +1,68 @@
+
+#include "stm32f429xx.h"
+void def_gpio(void);
+void def_timer(void);
+int x;
+int a;
+void adc_def(void);
+uint16_t adc_read();
+
+void def_gpio(){
+RCC->AHB1ENR |= ((1<<0) | (1<<6)); //Enabling clock for GPIOA
+GPIOA->MODER |= (2<<0); //SET IN ALTERNATE FXN MODE
+GPIOA->AFR[0] |= (1<<0); //SET AFRL REGISTER PA0 IN TIM2_CH1
+GPIOG->MODER |= (1<<28);
+}
+void def_timer(){
+RCC->APB1ENR |= 1<<0; //ENABLE Timer2 peripheral
+TIM2->CCMR1 = 0x0060; //TIM2 IN Pwm-1 mode (HIGH till TIM_CNT<TIM_CCR1)
+TIM2->PSC = 16-1; //prescaler value = 16000(if counted 0)
+TIM2->ARR = 1000-1; //Autoreload value = 1000(if counted 0)
+TIM2->CCR1 = 0; //Value=500 in the Compare register
+TIM2->CCER |= (1<<0); //Compare enable for channel 1
+TIM2->CR1 |= TIM_CR1_CEN; //counter enable
+}
+
+void adc_def(void){
+/*ADC1 clock enable*/
+RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+/*mode set to analog for PC0 i.e ADC1_IN10*/
+GPIOC->MODER |= (3<<0);
+/**/
+ADC->CCR = 0;
+/*ADC ON and enable continous conversion*/
+ADC1->CR2 |= (ADC_CR2_ADON | ADC_CR2_CONT);
+/*sequence set for ADC1_IN10*/
+ADC1->SQR3 = 10;
+/*Start ADC by SWSTART bit*/
+ADC1->CR2 |= ADC_CR2_SWSTART;
+GPIOG->MODER |= (1<<26) | (1<<28);
+}
+uint16_t adc_read(){
+	while (!(ADC1->SR & ADC_SR_EOC)){}
+	return ADC1->DR;
+}
+int main(){
+	def_gpio();
+	def_timer();
+	adc_def();
+	while(1){
+		a = adc_read();
+		x = (a * 1000) / 4095; 		//12bit adc so 2^12 = 4096, at max=4096 adc value glow should be max
+		TIM2->CCR1 = x;
+
+/*used the a>2000 condition to check if adc is reading values or not, this part is optional*/
+
+//		if (a > 2000) {
+//    GPIOG->ODR |= (1 << 13); // Set PG13
+//		} 	
+//		else {
+//    GPIOG->ODR &= ~(1 << 13); // Clear PG13
+//		}
+		if (TIM2->SR & TIM_SR_UIF){ //PG14 LED blink
+			GPIOG->ODR ^= 1<<14; //Toggling PG14 RED LED
+			TIM2->SR &= ~(TIM_SR_UIF); //Clearing Update interrupt flag
+		}
+	}
+}
