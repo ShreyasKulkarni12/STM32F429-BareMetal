@@ -1,1 +1,10 @@
-
+Using ADC of the SMT32F429ZITX IC to control USART6 peripheral.
+Material Required : 1. STM32F429-Discovery board
+                    2. Potentiometer
+Working : 
+1. Locate the OUT, VCC and GND pins of the external potentiometer 
+2. OUT pin should be connected to the ADC channel (configured by software) VCC should be connected to ON-board 3.3V pin and GND should be
+   connected to the ON-board GND pin.
+3. Configure the USART6 by software for TX.
+4. By software, write a code to turn on the ADC, and start the "continous" conversion. 
+5. Slide the potentiometer to control the USART6 Transmission.
