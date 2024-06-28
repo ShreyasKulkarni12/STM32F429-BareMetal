@@ -1,1 +1,12 @@
-
+Measuring the internal temprature of the SMT32F429ZITX IC with the help of an Internal Temprature sensor, connected to the ADC1_IN18 channel of the ADC peripheral.
+Material Required : 1. STM32F429-Discovery board
+                    2. Potentiometer
+Working : 
+1. Locate the OUT, VCC and GND pins of the external potentiometer 
+2. OUT pin should be connected to the ADC channel (configured by software) VCC should be connected to ON-board 3.3V pin and GND should be
+   connected to the ON-board GND pin.
+3. Configure the timer to PWM mode by software and the CCR1 register's should be variable wrt to the ADC value to control the LED
+   connected to the Timer channel pin(configured by software)
+4. By software, write a code to turn on the ADC, and start the "continous" conversion. 
+5. Slide the potentiometer to control the brightness of the LED.
+6. You can also configure the UART module to display the real-time ADC values while sliding the potentiometer.
