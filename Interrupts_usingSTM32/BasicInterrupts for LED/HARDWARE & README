@@ -1,1 +1,8 @@
+Hardware connections for running Interrupt to Toggle LED : 
 
+Material Required : 1. Any STM32 board
+	                  
+
+Working : 
+1. By software, write a code to generate an interrupt when the PA0 button(ON-board Push button which is internally connected) is pressed.
+2. Refer to the "General_structure_for_Interrupts.txt" to configure your interrupt.
