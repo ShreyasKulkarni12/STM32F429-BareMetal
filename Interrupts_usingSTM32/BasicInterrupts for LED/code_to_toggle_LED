@@ -1,0 +1,35 @@
+#include "stm32f429xx.h"
+
+void inter_init(void);
+static void exti_callback(void);
+void EXTI0_IRQHandler(void);
+
+int main(){
+inter_init();
+while(1){}
+}
+void inter_init(){ 
+/*enable portA & G clock*/
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOGEN;
+/*set GPIOA PIN 0 to input*/
+GPIOA->MODER &= ~(1<<0);
+GPIOG->MODER |= 1<<28;
+/*enable syscfg clock*/
+RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+/*set up EXTI control FOR PORT A*/
+SYSCFG->EXTICR[0] = 0;
+/*unmask the particular pin */
+EXTI->IMR |= 1<<0;
+/*select the falling/rising edge trigger we are selecting falling*/
+EXTI->FTSR |= 1;
+/*enable exti in nvic, EXTI0 because we are using 0th bit*/
+NVIC_EnableIRQ(EXTI0_IRQn);
+}
+static void exti_callback(void){
+	GPIOG->ODR ^= 1<<14;
+}
+void EXTI0_IRQHandler(void){
+	if ((EXTI->PR & EXTI_PR_PR0)!= 0){
+		EXTI->PR = EXTI_PR_PR0;
+		exti_callback();}
+}
