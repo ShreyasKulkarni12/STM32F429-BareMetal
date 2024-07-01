@@ -1,0 +1,10 @@
+There are 3 ADC's in the STM32F429 controller discovery board. ADC1 is available in 12-bit,10-bit and 6-bit mode whereas others aren't. ADC1 is also connected to an internal temperature sensor. Also there are various modes in which we can run a ADC, single-channel, multi-channel and injected-channel.
+
+General code flow to configure ADC's -
+1. Enable the ADCx clock in the corresponding RCC register [ex : RCC->APB2ENR]
+2. in ADCx->CR1 you can select the resolution of the ADC as per your choice [bits 25:24]
+3. in ADCx->SQR1/2/3 registers you can set the sequence of which channel you want to convert first. this is a very 
+   good option when using multiple-channels. suppose we want to convert ADCx_IN10[channel 10] first, we need to setit 
+   in the ADC123->SQR3 register on the 4:0 bits, the next is suppose ADCx_IN2, so we put 2 (in binary) in the next bits. 
+4. now next in the ADCx->CR2 we need to set the "ADON" bit on the 0th position [to wake up the ADC] as well as the SWSTART bit on the 31st position [to start the conversion]
+5. now for reading the data, we compare the register ADCx_SR and bit EOC[end of conversion] and then read the data from ADCx_DR to store it in any variable. and use it further. 
