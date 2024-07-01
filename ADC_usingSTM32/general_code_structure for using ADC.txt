@@ -1,4 +1,4 @@
-There are 3 ADC's in the STM32F429 controller discovery board. ADC1 is available in 12-bit,10-bit and 6-bit mode whereas others aren't. ADC1 is also connected to an internal temperature sensor. Also there are various modes in which we can run a ADC, single-channel, multi-channel and injected-channel.
+There are 3 ADC's in the STM32F429 controller discovery board. ADC1 is available in 12-bit,10-bit and 6-bit mode whereas others aren't. ADC1 is also internally connected to an internal temperature sensor. Also there are various modes in which we can run a ADC, single-channel, multi-channel and injected-channel.
 
 General code flow to configure ADC's -
 1. Enable the ADCx clock in the corresponding RCC register [ex : RCC->APB2ENR]
