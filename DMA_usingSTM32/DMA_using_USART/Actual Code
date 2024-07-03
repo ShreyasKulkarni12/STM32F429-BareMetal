@@ -1,0 +1,67 @@
+#include "stm32f429xx.h"
+void uart_def();
+void def_dma(uint32_t src, uint32_t dst, uint32_t len);
+void dma_callback();
+int main(){
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;
+GPIOG->MODER |= 1<<26;
+uart_def();
+char m[31] = "Hello from STM32 DMA Transfer\r\n";
+def_dma((uint32_t)m, (uint32_t)&USART2->DR, 31);
+while(1){}
+}
+void def_dma(uint32_t src, uint32_t dst, uint32_t len){
+/*enable DMA clock*/
+RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+/*clear Enable DMA bit in CR register bec if we dont, configrations wont be counted cause bits are locked later*/
+DMA1_Stream6->CR &= ~DMA_SxCR_EN;
+/*Clear all interrupt flags for stream6*/
+DMA1->HIFCR |= 31<<18;
+/*set destination*/
+DMA1_Stream6->PAR = dst;
+/*set source*/
+DMA1_Stream6->M0AR = src;
+/*set data stream length*/
+DMA1_Stream6->NDTR = len;
+/*channel4 select*/
+DMA1_Stream6->CR |= 1<<27;
+/*memory increment enable*/
+DMA1_Stream6->CR |= DMA_SxCR_MINC;
+/*memory to peripheral direction select*/
+DMA1_Stream6->CR |= 1<<6;
+/*fifo disable*/
+DMA1_Stream6->FCR = 0;
+/*Ttansfer complete interrupt*/
+DMA1_Stream6->CR |= DMA_SxCR_TCIE;
+/*enable DMA*/
+DMA1_Stream6->CR |= DMA_SxCR_EN;
+/*Interrupt enable for DMA1 stream6*/
+NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+}
+void uart_def(){
+/*clock enable usart2*/
+RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+/*baud rate 9600 set*/
+USART2->BRR = 0x683;
+/*dma enable transmission*/
+USART2->CR3 |= USART_CR3_DMAT;
+/*enable transmission*/
+USART2->CR1 |= USART_CR1_TE;
+/*enable usart2*/
+USART2->CR1 |= USART_CR1_UE;
+/*gpio clock enable*/
+RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+/*set gpio to af*/
+GPIOD->MODER |= (1<<11 | 1<<13);
+/*set gpio to tx and rx using AFR*/
+GPIOD->AFR[0] |= (7<<20 | 7<<24);
+}
+void DMA1_Stream6_IRQHandler(){
+	if (DMA1->HISR & DMA_HISR_TCIF6){
+	DMA1->HISR |= DMA_HIFCR_CTCIF6;
+	dma_callback();
+	}
+}
+void dma_callback(){
+	GPIOG->ODR |= 1<<13;
+}
