@@ -1,0 +1,2 @@
+PORT-D PIN 5 is used as a TX for USART2 using AFR[0] register as its AF7, we do the needful in AFR[0] register as per the refrence manual.
+FTDI-FT232 should be grounded on Microcontroller board's ground pins.
