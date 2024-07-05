@@ -1,0 +1,168 @@
+#include "stm32f4xx.h"
+
+void def_adc(void);
+void uart_def(void);
+void def_dma_adc(uint32_t src, uint32_t dst, uint32_t len);
+void def_dma_usart(uint32_t src, uint32_t dst, uint32_t len);
+
+char m[31];
+
+int main(void) {
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;
+    GPIOG->MODER |= (1 << 26) | (1 << 28); // PG13 and PG14 as output
+
+    def_adc();
+    uart_def();
+
+    // Start ADC conversion
+    ADC1->CR2 |= ADC_CR2_SWSTART;
+
+    def_dma_adc((uint32_t)&ADC1->DR, (uint32_t)m, 1);
+    def_dma_usart((uint32_t)m, (uint32_t)&USART2->DR, 1);
+
+    while (1) {    // Main loop
+    }
+}
+
+void def_dma_adc(uint32_t src, uint32_t dst, uint32_t len) {
+    // Enable DMA clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+
+    // Clear Enable DMA bit in CR register
+    DMA2_Stream0->CR &= ~DMA_SxCR_EN;
+
+    // Clear all interrupt flags for stream0
+    DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
+
+    // Set source (peripheral address)
+    DMA2_Stream0->PAR = src;
+
+    // Set destination (memory address)
+    DMA2_Stream0->M0AR = dst;
+
+    // Set data stream length
+    DMA2_Stream0->NDTR = len;
+
+    // Channel 0 select
+    DMA2_Stream0->CR &= ~DMA_SxCR_CHSEL_Msk;
+
+    // Memory increment enable
+    DMA2_Stream0->CR |= DMA_SxCR_MINC;
+
+    // Peripheral to memory direction select
+    DMA2_Stream0->CR &= ~DMA_SxCR_DIR_Msk;
+
+    // FIFO disable
+    DMA2_Stream0->FCR = 0;
+
+    // Transfer complete interrupt
+    DMA2_Stream0->CR |= DMA_SxCR_TCIE;
+		DMA2_Stream0->CR |= DMA_SxCR_CIRC;
+    // Enable DMA
+    DMA2_Stream0->CR |= DMA_SxCR_EN;
+
+    // Interrupt enable for DMA2 stream0
+    NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+}
+
+void def_dma_usart(uint32_t src, uint32_t dst, uint32_t len) {
+    // Enable DMA clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+
+    // Clear Enable DMA bit in CR register
+    DMA1_Stream6->CR &= ~DMA_SxCR_EN;
+
+    // Clear all interrupt flags for stream6
+    DMA1->HIFCR |= DMA_HIFCR_CTCIF6;
+
+    // Set source (memory address)
+    DMA1_Stream6->M0AR = src;
+
+    // Set destination (peripheral address)
+    DMA1_Stream6->PAR = dst;
+
+    // Set data stream length
+    DMA1_Stream6->NDTR = len;
+
+    // Channel 4 select
+    DMA1_Stream6->CR = (4 << DMA_SxCR_CHSEL_Pos);
+
+    // Memory increment enable
+    DMA1_Stream6->CR |= DMA_SxCR_MINC;
+
+    // Memory to peripheral direction select
+    DMA1_Stream6->CR |= DMA_SxCR_DIR_0;
+
+    // FIFO disable
+    DMA1_Stream6->FCR = 0;
+
+    // Transfer complete interrupt
+    DMA1_Stream6->CR |= DMA_SxCR_TCIE;
+		DMA1_Stream6->CR |= DMA_SxCR_CIRC;
+    // Enable DMA
+    DMA1_Stream6->CR |= DMA_SxCR_EN;
+
+    // Interrupt enable for DMA1 stream6
+    NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+}
+
+void uart_def(void) {
+    // Clock enable for USART2
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+
+    // Baud rate 9600
+    USART2->BRR = 0x0683;
+
+    // DMA enable for transmission
+    USART2->CR3 |= USART_CR3_DMAT;
+
+    // Enable USART2
+    USART2->CR1 |= USART_CR1_UE | USART_CR1_TE;
+
+    // GPIO clock enable
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+
+    // Set GPIOD pins 5 and 6 to AF mode
+    GPIOD->MODER |= (2 << 10) | (2 << 12);
+
+    // Set AF mode 7 for USART2 (TX and RX)
+    GPIOD->AFR[0] |= (7 << 20) | (7 << 24);
+
+    // Enable USART2 IRQ
+    NVIC_EnableIRQ(USART2_IRQn);
+}
+
+void def_adc(void) {
+    // Clock enable for ADC1
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+
+    // Set GPIOC pin 4 to analog mode
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+    GPIOC->MODER |= (3 << 8);
+
+    // ADC sequence
+    ADC1->SQR3 = 14;
+
+    // ADC on and enable DMA
+    ADC1->CR2 |= ADC_CR2_ADON | ADC_CR2_DMA;
+}
+
+void DMA2_Stream0_IRQHandler(void) {
+    if (DMA2->LISR & DMA_LISR_TCIF0) {
+        DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
+        GPIOG->ODR |= (1 << 13);
+    }
+}
+
+void DMA1_Stream6_IRQHandler(void) {
+    if (DMA1->HISR & DMA_HISR_TCIF6) {
+        DMA1->HIFCR |= DMA_HIFCR_CTCIF6;
+        GPIOG->ODR |= (1 << 14);
+    }
+}
+
+void USART2_IRQHandler(void) {
+    if (USART2->SR & USART_SR_TC) {
+        USART2->SR &= ~USART_SR_TC;
+    }
+}
