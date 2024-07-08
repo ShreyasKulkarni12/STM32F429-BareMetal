@@ -28,6 +28,34 @@ I2C_byteread(char saddr, char maddr, char* data){
 11. we put the STOP condition by activating the STOP bit in CR1. 
 12. then we wait for the RXE bit in the SR1 register to go low which would mean the register is empty. after that, we store the deata we read in memory with pointer's help
     (*data++ = I2Cx->DR).
+}
 
+I2C_BurstRead(char saddr, char maddr, int n, char* data){
+1. define a variable to read SRx registers to clear the ADDR bit, for ex : tmp 
+2. check BUSY flag in I2C_SR2 register using while loop, we shall only move forward when the BUSY bit is low.
+3. after the BUSY bit is low, we need to generate I2C start using I2C_CR1 register, wherein the 8th bit is START bit. Then we again wait for the I2C to start and put a while condition
+   to check the SB[Start Bit] in the I2C_SR1 register. when the SB bit is high, we move forward.
+4. Now, we send the slave address(saddr) in the I2C->DR register, and we can also tell what we want to do, write or read.[I2Cx->DR = saddr << 1]
+5. we wait for the ADDR flag to get high to indicate that the address has been sent.
+6. after that we clear the ADDR flag by reading the SR2 register as suggested in the Note. [tmp = I2C->SR2] 
+7. and then wait for the TXE bit in SR1 register to get high. which will tell us that the register is empty.
+8. then we will send the memory address and then again check the TXE bit in SR1 register to ensure delivery.
+9. after that, we again generate a start mentioned in the 3rd step, and again wait for the SB bit as we did earlier.
+10. then we read from the slave address by transmitting I2Cx->DR = (saddr << 1 | 1) then we again wait for the ADDR bit just like in 5th step. and then clear the ADDR flag by tmp = ADDR
+11. now for burst read- 
+    while (n>0){ 
+      if (n==1){
+         I2C1->CR1 &= ~I2C_CR1_ACK;          //last byte of data ack should always be cleared.
+         I2C1->CR1 |= I2C_CR1_STOP;
+         while (!(I2C1->SR1 & IC2_SR1_RXNE)){}
+         (*data++) = I2C1->DR;
+         break;
+      else {
+         while (!(I2C1->SR1 & IC2_SR1_RXNE)){}
+         (*data++) = I2C1->DR;
+         n--;
+      }
+   }
+}
 
 }
