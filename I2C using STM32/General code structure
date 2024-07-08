@@ -1,0 +1,33 @@
+I2C_init(){
+1. Locate the Alternate functions table and find the I2C channels, enable the clock for SCL and SDL port/ports and set them to Alternate Functions.
+2. Set the port pins[SCL,SDL] to *Open-Drain* mode and Enable *Pull-up* for both the port pins.
+3. In APB1ENR enable I2C clock, then reset the I2C module by setting the I2C using SWRST bit in I2C_CR1 register. Then, clear the same bit to bring I2C in usable state.
+4. Then in the I2C_CR2 register, set the Frequency of the I2C module by writing normal binary values in the 6-bit field of frequency, suppose we want 16MHz, so we will write 
+   0x010000 to get 16 MHz.
+5. After that in the I2C_CCR register, we put value = 80 in the 12-bit CCR field which gives us I2C standard mode [100KHz].
+6. Then we set the "standard mode rise time" in the I2C_TRISE register, we set the value as 17 for it.
+7. Then we enable the "PE" bit [peripheral enable] in I2C_CR1 to turn the I2C on.
+}
+
+*Note:* Reading I2C_SR2 after reading I2C_SR1 clears the ADDR flag, even if the ADDR flag was
+set after reading I2C_SR1. Consequently, I2C_SR2 must be read only when ADDR is found
+set in I2C_SR1 or when the STOPF bit is cleared.
+
+I2C_byteread(char saddr, char maddr, char* data){
+1. define a variable to read SRx registers to clear the ADDR bit, for ex : tmp 
+2. check BUSY flag in I2C_SR2 register using while loop, we shall only move forward when the BUSY bit is low.
+3. after the BUSY bit is low, we need to generate I2C start using I2C_CR1 register, wherein the 8th bit is START bit. Then we again wait for the I2C to start and put a while condition
+   to check the SB[Start Bit] in the I2C_SR1 register. when the SB bit is high, we move forward.
+4. Now, we send the slave address(saddr) in the I2C->DR register, and we can also tell what we want to do, write or read.[I2Cx->DR = saddr << 1]
+5. we wait for the ADDR flag to get high to indicate that the address has been sent.
+6. after that we clear the ADDR flag by reading the SR2 register as suggested in the Note. [tmp = I2C->SR2] 
+7. then we send the memory address(from where we have to read the data in slave) and then wait for the TXE bit in SR1 register to get high.
+8. after that, we again generate a start mentioned in the 3rd step, and again wait for the SB bit as we did earlier.
+9. then we read from the slave address by I2Cx->DR = (saddr << 1 | 1) then we again wait for the ADDR bit just like in 5th step.
+10. now we disable the ACK bit in the I2CX->CR1 register. and then again clear the ADDR flag by again reading the SR2 register.(as we read the SR1 register in 7th step.)
+11. we put the STOP condition by activating the STOP bit in CR1. 
+12. then we wait for the RXE bit in the SR1 register to go low which would mean the register is empty. after that, we store the deata we read in memory with pointer's help
+    (*data++ = I2Cx->DR).
+
+
+}
