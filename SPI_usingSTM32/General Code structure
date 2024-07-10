@@ -1,0 +1,13 @@
+The SPI peripheral in the STM32 board has 5 SPI modules in total. They are split between 2 buses and also used for I2S alternatively.
+General code structure for SPI - 
+  1. Locate the GPIO pins capable of performing SPI operation in the datasheet. enable their clocks using AHB1ENR register.
+  2. notably, there are 4 pins we need to configure as alternate functions, SCK(serial clock), MOSI (master out slave in), MISO (master in slave out), in the POV of the master,  
+     the MISO pin is *data input pin*, while the MOSI is *data output pin*. the serial clock will always be given by the MASTER device.
+  3. Enable the SPIx Clock from the APB2ENR/APB1ENR, after that, set the frequency of the peripheral clock [fpclk] in the SPIx->CR1 register.
+  4. Set the CPOL(Clock Polarity) and CPHA(Clock Phase) in the CR1 register, agreeing on CPOL and CPHA is a vital part of initializing the SPI.
+  5. Enable the FULL-DUPLEX mode in the CR1 register again, the "RX ONLY" bit should be low to enable full duplex communication.
+  6. Configure the bit direct (LSB/MSB first) , configure the "LSBFIRST" bit in the CR1 register, [normally low].
+  7. Enable the Master mode for STM32 board from the CR1 register in the "MSTR"(master selection), we have to set this bit high for our board to be the master.
+  8. Configure if you want 8-bit or 16-bit data mode for transmission/reception in the "DFF" (data frame format) bit in the CR1 register.
+  9. Configure the SSM(software slave management) and SSI(internal slave select), we need to set both to 1 in order to use GPIO PA9 as slave select.
+  10. Set the "SPE" bit in the CR1 register to enable the SPI peripheral. 
