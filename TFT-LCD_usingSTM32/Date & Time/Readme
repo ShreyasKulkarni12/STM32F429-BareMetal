@@ -1,0 +1,5 @@
+On the TFT-LCD, we have implemented a program to display the DATE and TIME using the RTC [Real Time Clock] module which is inside the STM32F429 board. 
+First, we have set up the RTC and the prescalers for the RTC clock, RTC generally needs 1 KHz clock to work properly. 
+Then we have used a "write access sequence" (in the refrence manual) in order to edit the RTC->DR and RTC->TR registers to enter the time and date.
+after which, we have isolated the dates and times in hours,minutes,seconds and year,month,date,day using bitwise shifting and masking to display the Real-Time "Time".
+These variables made are now stored into a buffer using sprintf() function and then simply transmitted to the Text function which displays it on LCD.
